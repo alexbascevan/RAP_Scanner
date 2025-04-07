@@ -39,6 +39,7 @@ def start_auto_saving(interval=1):
     def autosave():
         while True:
             save_to_json()
+            save_alert_data()
             time.sleep(interval)
     thread = threading.Thread(target=autosave, daemon=True)
     thread.start()
@@ -354,6 +355,7 @@ def main():
               store=False,
               timeout=update_timeout)
         save_to_json()  # Save the current scan results periodically
+        save_alert_data() # Save the current alert results periodically
 
         if args.live_updates:
             os.system("clear")  # Clear the terminal screen for a fresh display
@@ -371,6 +373,9 @@ def main():
         print_ap_data_table(ap_data)
         print_alerts_table(alerts)
         save_alert_data()
+
+    save_alert_data() # Final save of alert data
+    save_to_json()  # Final save of scan data
 
 if __name__ == "__main__":
     main()
