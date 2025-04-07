@@ -16,6 +16,7 @@ import os
 import argparse
 import time
 import struct
+import threading
 from scapy.all import *
 
 # This dictionary stores all the Access Point (AP) info, using the BSSID as the key.
@@ -32,6 +33,15 @@ def save_to_json():
     """Dump the current AP data into a JSON file for later review."""
     with open(json_file, "w") as f:
         json.dump(ap_data, f, indent=4)
+
+def start_auto_saving(interval=1):
+    """Continuously save AP data to JSON every `interval` seconds."""
+    def autosave():
+        while True:
+            save_to_json()
+            time.sleep(interval)
+    thread = threading.Thread(target=autosave, daemon=True)
+    thread.start()
 
 def save_alert_data():
     """Dump all alerts into a JSON file for later review."""
@@ -333,6 +343,9 @@ def main():
     start_time = time.time()
     # Adjust the timeout for each sniffing session based on whether live updates/alerts are showing.
     update_timeout = 1 if args.live_updates or args.live_alerts_only else 5
+
+    # Start background thread to auto-save AP data every 1 second
+    start_auto_saving()
 
     # Keep scanning for the specified duration 
     while time.time() - start_time < args.duration:
